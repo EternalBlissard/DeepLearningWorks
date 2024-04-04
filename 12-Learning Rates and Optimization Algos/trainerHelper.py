@@ -1,7 +1,7 @@
 import time
 import torch
 from baseSetterHelper import computeAccu
-def modelTrainer(model1, numEpochs, trainLoader,testLoader,valLoader, opt, device):
+def modelTrainer(model1, numEpochs, trainLoader,testLoader,valLoader, opt, device,scheduler=None,schedulerOn='validAcc'):
   startTime = time.time()
   miniBatchLoss = []
   trainAccLoss = []
@@ -31,6 +31,14 @@ def modelTrainer(model1, numEpochs, trainLoader,testLoader,valLoader, opt, devic
       print(f'Train Acc {trainLoss :.4f}%')
       print(f'Val Acc   {valLoss:.4f}%')
       print(f'Time Taken: {((time.time()-startTime)/60):.2f} min')
+      if(scheduler is not None):
+        if(schedulerOn == 'validAcc'):
+          scheduler.step(valAccLoss[-1])
+        elif(schedulerOn == 'miniBatchLoss'):
+          scheduler.step(miniBatchLoss[-1])
+        else:
+          raise ValueError(f'invalid choice for SchedulerOn {schedulerOn}')
+          
 #     break
   testLoss = computeAccu(model1, testLoader, device)
   print(f'Test Acc   {testLoss:.4f}%')
