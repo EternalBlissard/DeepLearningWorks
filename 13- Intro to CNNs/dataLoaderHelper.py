@@ -97,9 +97,9 @@ def getDataLoadersCIFAR10(batchSize, numWorkers=0,validFraction =None, trainTran
                               transform=testTransforms)
 
   if(validFraction is not None):
-    num = int(validFraction*60000)
-    trainIndices = torch.arange(0,60000-num)
-    valIndices = torch.arange(60000-num, 60000)
+    num = int(validFraction*50000)
+    trainIndices = torch.arange(0,50000-num)
+    valIndices = torch.arange(50000-num, 50000)
 
     trainSampler=SubsetRandomSampler(trainIndices)
     valSampler = SubsetRandomSampler(valIndices)
