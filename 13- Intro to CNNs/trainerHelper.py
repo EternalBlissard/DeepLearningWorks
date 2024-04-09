@@ -1,11 +1,13 @@
 import time
 import torch
+import numpy 
 from baseSetterHelper import computeAccu
 def modelTrainer(model1, numEpochs, trainLoader,testLoader,valLoader, opt, device,scheduler=None,schedulerOn='validAcc'):
   startTime = time.time()
   miniBatchLoss = []
   trainAccLoss = []
   valAccLoss = []
+  valPlotAccLoss =[]
   for e in range(numEpochs):
     model1.train()
     for batchIdx, (features,targets) in enumerate(trainLoader):
@@ -26,8 +28,9 @@ def modelTrainer(model1, numEpochs, trainLoader,testLoader,valLoader, opt, devic
       print('Epoch:%03d/%03d |' %(e+1, numEpochs))
       trainLoss = computeAccu(model1, trainLoader,device)
       valLoss   = computeAccu(model1, valLoader  ,device)
-      trainAccLoss.append(trainLoss)
       valAccLoss.append(valLoss)
+      trainAccLoss.append(trainLoss.cpu().numpy())
+      
       print(f'Train Acc {trainLoss :.4f}%')
       print(f'Val Acc   {valLoss:.4f}%')
       print(f'Time Taken: {((time.time()-startTime)/60):.2f} min')
@@ -38,10 +41,11 @@ def modelTrainer(model1, numEpochs, trainLoader,testLoader,valLoader, opt, devic
           scheduler.step(miniBatchLoss[-1])
         else:
           raise ValueError(f'invalid choice for SchedulerOn {schedulerOn}')
-          
+      # valAccLoss[-1] = valLoss.detach().numpy()
+      valPlotAccLoss.append(valLoss.cpu().numpy())
 #     break
   testLoss = computeAccu(model1, testLoader, device)
   print(f'Test Acc   {testLoss:.4f}%')
   print(f'Total Time Taken: {((time.time()-startTime)/60):.2f} min')
 
-  return miniBatchLoss, trainAccLoss, valAccLoss
+  return miniBatchLoss, trainAccLoss, valPlotAccLoss 
